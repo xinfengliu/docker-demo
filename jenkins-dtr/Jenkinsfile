@@ -1,0 +1,33 @@
+pipeline {
+  agent any
+
+  environment {
+	TAG = '4.0'
+	REPOSITORY = 'org123/hello'
+  }
+  stages {
+    stage('build-docker-image') {
+      steps {
+        sh '''
+          echo "begin build docker image..."
+	  docker build -t $DTR_REGISTRY/$REPOSITORY:$TAG . 
+        '''
+      }
+    }
+   stage('push-docker-image') {
+      environment {
+       	DTR_CRED = credentials('jenkins-dtr')
+      }
+      steps {
+        sh '''
+          echo "Login to DTR ..."
+	  docker login -u $DTR_CRED_USR -p $DTR_CRED_PSW $DTR_REGISTRY
+          echo "begin push docker image..."
+          docker push $DTR_REGISTRY/$REPOSITORY:$TAG 
+	  docker logout $DTR_REGISTRY
+        '''
+      }
+    }
+  }
+}
+

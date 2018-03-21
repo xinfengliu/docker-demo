@@ -1,0 +1,45 @@
+pipeline {
+  agent any
+
+  environment {
+	REPOSITORY = 'org123/hello'
+  }
+  stages {
+    stage('build-docker-image') {
+      steps {
+        sh '''
+	  TAG=$(git log --format="%h" -n1)
+          echo "begin build docker image..."
+	  docker build -t $DTR_REGISTRY/$REPOSITORY:$TAG . 
+        '''
+      }
+    }
+   stage('push-docker-image') {
+      environment {
+       	DTR_CRED = credentials('jenkins-dtr')
+	DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE = credentials('image-signing-root-pass')
+	DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE = credentials('image-signing-repo-pass')
+      }
+      steps {
+        sh '''
+	  TAG=$(git log --format="%h" -n1)
+	  export DOCKER_CONTENT_TRUST=1
+          # passphrase will be shown as ****
+	  echo $TAG $DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE $DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE
+          echo "Login to DTR ..."
+	  docker login -u $DTR_CRED_USR -p $DTR_CRED_PSW $DTR_REGISTRY
+	  # as client, trust DTR CA 
+	  if ! curl https://$DTR_REGISTRY 
+	  then 
+	    curl -k https://$DTR_REGISTRY/ca | tee /usr/local/share/ca-certificates/dtr.crt
+	    update-ca-certificates
+	  fi
+          echo "begin push docker image..."
+          docker push $DTR_REGISTRY/$REPOSITORY:$TAG 
+	  docker logout $DTR_REGISTRY
+        '''
+      }
+    }
+  }
+}
+
