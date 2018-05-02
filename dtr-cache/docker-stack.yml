@@ -1,0 +1,43 @@
+version: "3.3"
+services:
+  cache:
+    image: docker/dtr-content-cache:2.5.0
+    entrypoint:
+      - /start.sh
+      - "/config.yml"
+    volumes:
+      - cache-data:/var/lib/registry
+    ports:
+      - mode: host
+        published: 9443
+        target: 443
+    deploy:
+      endpoint_mode: dnsrr
+      replicas: 1
+      placement:
+        constraints: [node.labels.dtr.cache == true]
+      restart_policy:
+        condition: on-failure
+    configs:
+      - config.yml
+    secrets:
+      - dtr.cert.pem
+      - cache.cert.pem
+      - cache.key.pem
+configs:
+  config.yml:
+    file: ./config.yml
+secrets:
+  dtr.cert.pem:
+    file: ./certs/dtr.cert.pem
+  cache.cert.pem:
+    file: ./certs/cache.cert.pem
+  cache.key.pem:
+    file: ./certs/cache.key.pem
+volumes:
+  cache-data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: 'addr=192.168.105.71,rw,hard,intr,sync,actimeo=0,nfsvers=4'
+      device: ':/nfsshare/dtr-cache'

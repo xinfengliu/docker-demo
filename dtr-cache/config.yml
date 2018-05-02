@@ -1,0 +1,24 @@
+version: 0.1
+log:
+  level: info
+storage:
+  delete:
+    enabled: true
+  filesystem:
+    rootdirectory: /var/lib/registry
+http:
+  addr: 0.0.0.0:443
+  secret: generate-random-secret
+# seems no use. host: https://192.168.105.78:443
+  tls:
+    certificate: /run/secrets/cache.cert.pem
+    key: /run/secrets/cache.key.pem
+middleware:
+  registry:
+      - name: downstream
+        options:
+          blobttl: 24h
+          upstreams:
+            - https://192.168.105.74
+          cas:
+            - /run/secrets/dtr.cert.pem
