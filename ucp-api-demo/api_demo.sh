@@ -11,10 +11,13 @@ if [ -z ${DOCKER_CERT_PATH} -o -z ${DOCKER_HOST} ]; then
   exit 1
 fi
 
+URL="${DOCKER_HOST/tcp/https}"
+
 ${CURL} -s \
      --cert ${DOCKER_CERT_PATH}/cert.pem \
      --key ${DOCKER_CERT_PATH}/key.pem \
      --cacert ${DOCKER_CERT_PATH}/ca.pem \
-     ${DOCKER_HOST/tcp/https}/"$*"
+     ${URL}/"$@"
+     #"${DOCKER_HOST/tcp/https}"/"$*"
 
 # example: "$0 api/banner"
