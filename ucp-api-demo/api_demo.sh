@@ -18,6 +18,5 @@ ${CURL} -s \
      --key ${DOCKER_CERT_PATH}/key.pem \
      --cacert ${DOCKER_CERT_PATH}/ca.pem \
      ${URL}/"$@"
-     #"${DOCKER_HOST/tcp/https}"/"$*"
 
 # example: "$0 api/banner"
