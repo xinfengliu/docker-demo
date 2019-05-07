@@ -17,6 +17,9 @@ ${CURL} -s \
      --cert ${DOCKER_CERT_PATH}/cert.pem \
      --key ${DOCKER_CERT_PATH}/key.pem \
      --cacert ${DOCKER_CERT_PATH}/ca.pem \
-     ${URL}/"$@"
+     -H 'Content-Type:application/json' \
+     ${URL}"$@"
 
-# example: "$0 api/banner"
+# example: "$0 /api/banner"
+# $0 /accounts/org1/teams/dev1/members/user1 -X PUT -d @t.json # add a user to a team
+# $0 /accounts -X POST -d @user.json  # create a user
