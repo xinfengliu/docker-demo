@@ -29,7 +29,12 @@ Note: Alternatively you can use DTR's key/cert to *issue* the cert for DTR cache
 
 ### Test
 DTR cache is transparent to client, so you still run `docker pull` against *original* DTR
+
+Note: 
+- Do NOT use client bundle to pull images, use `docker login` first.
+- Ensure your local node does NOT have the blob layers of the image to be pulled, otherwise the node will not pull layers at all.
 ```
+docker login 192.168.105.74
 docker pull 192.168.105.74/admin/busybox:1.28.3-glibc
 ```
 Then it will be redirected to DTR cache server behind the scene. Check dtr-cache container logs and /nfsshare/dtr-cache to prove DTR cache is effective.
